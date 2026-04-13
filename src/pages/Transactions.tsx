@@ -142,6 +142,16 @@ export default function Transactions() {
   const totalIncome = transactions.filter(t => t.type === TransactionType.Income).reduce((s, t) => s + t.amount, 0)
   const totalExpense = transactions.filter(t => t.type === TransactionType.Expense).reduce((s, t) => s + t.amount, 0)
 
+  const totalsByCategory = categories
+  .map(c => ({
+    categoryId: c.id,
+    categoryDescription: c.description,
+    total: transactions
+      .filter(t => t.categoryId === c.id)
+      .reduce((sum, t) => sum + t.amount, 0)
+  }))
+  .filter(c => c.total > 0)
+
   return (
     <div>
       <div className="animate-fade" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
@@ -170,7 +180,32 @@ export default function Transactions() {
             <div style={{ fontSize: 18, fontWeight: 600, color: (totalIncome - totalExpense) >= 0 ? 'var(--green)' : 'var(--red)' }}>{fmt(totalIncome - totalExpense)}</div>
           </div>
         </div>
+        
       )}
+
+      {!loading && totalsByCategory.length > 0 && (
+      <div className="animate-fade-2" style={{ marginBottom: 20 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+          Totais por Categoria
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          {totalsByCategory.map(c => (
+            <div key={c.categoryId} style={{
+              background: 'var(--surface)', border: '1px solid var(--border)',
+              borderRadius: 'var(--radius)', padding: '12px 16px',
+              boxShadow: 'var(--shadow)', minWidth: 150
+            }}>
+              <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500, marginBottom: 4 }}>
+                {c.categoryDescription}
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 600 }}>
+                {fmt(c.total)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
 
       <div className="animate-fade-3" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)', overflow: 'hidden' }}>
         {loading ? (
@@ -206,7 +241,7 @@ export default function Transactions() {
                       </span>
                     </td>
                     <td style={{ padding: '12px 20px', fontSize: 13.5, fontWeight: 500 }}>{t.description}</td>
-                    <td style={{ padding: '12px 20px', color: 'var(--text-2)', fontSize: 13 }}>{t.categoryName}</td>
+                    <td style={{ padding: '12px 20px', color: 'var(--text-2)', fontSize: 13 }}>{t.categoryDescription}</td>
                     <td style={{ padding: '12px 20px', fontWeight: 600, fontSize: 13.5, color: isIncome ? 'var(--green)' : 'var(--red)' }}>
                       {isIncome ? '+' : '-'}{fmt(t.amount)}
                     </td>
