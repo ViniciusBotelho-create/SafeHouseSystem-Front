@@ -43,7 +43,7 @@ Antes de rodar o projeto, é necessário configurar as variáveis de ambiente.
 Exemplo:
 
 ```
-VITE_API_URL=https://localhost:7099
+VITE_API_URL=https://localhost:7099/api
 ```
 
 ## Como rodar o projeto
