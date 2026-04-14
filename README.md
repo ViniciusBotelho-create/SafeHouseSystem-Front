@@ -1,4 +1,4 @@
-# SafeHouse - Controle de Gastos Residenciais
+# SafeHouseSystem - Controle de Gastos Residenciais
 
 Sistema para gerenciamento de despesas e receitas de moradores de uma residência.
 
