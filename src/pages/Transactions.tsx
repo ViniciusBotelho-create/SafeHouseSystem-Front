@@ -9,6 +9,17 @@ function fmt(n: number) {
   return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
+function calculateCategoryTotals(transactions: Transaction[]) {
+  return transactions.reduce(
+    (acc, t) => {
+      if (t.type === TransactionType.Income) acc.income += t.amount
+      else acc.expense += t.amount
+      return acc
+    },
+    { income: 0, expense: 0 }
+  )
+}
+
 function Modal({ onClose, onSave, categories, persons }: {
   onClose: () => void
   onSave: (d: CreateTransactionDto) => Promise<void>
@@ -142,15 +153,18 @@ export default function Transactions() {
   const totalIncome = transactions.filter(t => t.type === TransactionType.Income).reduce((s, t) => s + t.amount, 0)
   const totalExpense = transactions.filter(t => t.type === TransactionType.Expense).reduce((s, t) => s + t.amount, 0)
 
-  const totalsByCategory = categories
-  .map(c => ({
+const totalsByCategory = categories.map(c => {
+  const t = transactions.filter(t => t.categoryId === c.id)
+  const { income, expense } = calculateCategoryTotals(t)
+
+  return {
     categoryId: c.id,
     categoryDescription: c.description,
-    total: transactions
-      .filter(t => t.categoryId === c.id)
-      .reduce((sum, t) => sum + t.amount, 0)
-  }))
-  .filter(c => c.total > 0)
+    income,
+    expense,
+    balance: income - expense
+  }
+}).filter(c => c.income > 0 || c.expense > 0)
 
   return (
     <div>
@@ -198,8 +212,16 @@ export default function Transactions() {
               <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500, marginBottom: 4 }}>
                 {c.categoryDescription}
               </div>
-              <div style={{ fontSize: 16, fontWeight: 600 }}>
-                {fmt(c.total)}
+             <div style={{ fontSize: 16, fontWeight: 600 }}>
+                <div style={{ color: 'var(--green)' }}>+ {fmt(c.income)}</div>
+                <div style={{ color: 'var(--red)' }}>- {fmt(c.expense)}</div>
+                <div style={{
+                  marginTop: 4,
+                  color: c.balance >= 0 ? 'var(--green)' : 'var(--red)',
+                  fontWeight: 600
+                }}>
+                  Saldo: {fmt(c.balance)}
+                </div>
               </div>
             </div>
           ))}
